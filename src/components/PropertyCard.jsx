@@ -1,7 +1,7 @@
 import { Heart, Bed, Bath, Square, MapPin, Star } from "lucide-react";
 
 export default function PropertyCard({ property, onSelect, onSave, isSaved }) {
-  const { title, type, listing, price, location, bedrooms, bathrooms, area, image, featured, new: isNew } = property;
+  const { title, type, listing, price, location, bedrooms, bathrooms, area, image, featured, new: isNew, walkScore, transitScore, virtualTourUrl } = property;
   const pricePerSqFt = Math.max(1, Math.round(price / area));
 
   const formatPrice = (p, listing) => {
@@ -57,6 +57,18 @@ export default function PropertyCard({ property, onSelect, onSave, isSaved }) {
             Featured
           </div>
         )}
+
+        {virtualTourUrl && (
+          <button
+            onClick={(event) => {
+              event.stopPropagation();
+              window.open(virtualTourUrl, "_blank", "noopener,noreferrer");
+            }}
+            className="absolute bottom-3 right-3 bg-black/60 border border-white/20 text-white text-[11px] px-2.5 py-1.5 rounded-full hover:bg-black/80 transition-colors"
+          >
+            360 Tour
+          </button>
+        )}
       </div>
 
       {/* Content */}
@@ -89,6 +101,11 @@ export default function PropertyCard({ property, onSelect, onSave, isSaved }) {
         <div className="flex items-center gap-1 text-white/40 text-xs mb-4">
           <MapPin size={12} />
           <span>{location}</span>
+        </div>
+
+        <div className="flex gap-2 mb-3">
+          <span className="text-[11px] px-2 py-1 rounded-full bg-white/5 border border-white/10 text-white/65">Walk {walkScore}</span>
+          <span className="text-[11px] px-2 py-1 rounded-full bg-white/5 border border-white/10 text-white/65">Transit {transitScore}</span>
         </div>
 
         {/* Stats */}

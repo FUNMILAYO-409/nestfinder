@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Search, MapPin, ChevronDown, BadgeDollarSign } from "lucide-react";
-import { cities, metroShortcuts } from "../data";
+import { cities, metroShortcuts, searchSuggestions } from "../data";
 
 export default function Hero({ onSearch, marketStats = [] }) {
   const [query, setQuery] = useState("");
@@ -86,8 +86,14 @@ export default function Hero({ onSearch, marketStats = [] }) {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+              list="hero-search-suggestions"
               className="input-field pl-9 py-2.5 text-sm"
             />
+            <datalist id="hero-search-suggestions">
+              {searchSuggestions.map((suggestion) => (
+                <option key={suggestion} value={suggestion} />
+              ))}
+            </datalist>
           </div>
 
           <button onClick={handleSearch} className="btn-primary py-2.5 px-6 flex items-center gap-2 justify-center">

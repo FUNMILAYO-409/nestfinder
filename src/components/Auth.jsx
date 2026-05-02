@@ -1,15 +1,17 @@
 import { useState } from "react";
 import { ArrowLeft, Eye, EyeOff, Home } from "lucide-react";
+import { isSupabaseConfigured, supabase, toAppUser } from "../lib/supabaseClient";
 
 export default function Auth({ mode, setPage, setUser }) {
   const [form, setForm] = useState({ name: "", email: "", password: "" });
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
 
   const isLogin = mode === "login";
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!form.email || !form.password) {
       setError("Please fill in all required fields.");
       return;
@@ -18,13 +20,50 @@ export default function Auth({ mode, setPage, setUser }) {
       setError("Please enter your name.");
       return;
     }
+    if (!isSupabaseConfigured || !supabase) {
+      setError("Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.");
+      return;
+    }
+
     setError("");
+    setMessage("");
     setLoading(true);
-    setTimeout(() => {
-      setUser({ name: isLogin ? form.email.split("@")[0] : form.name, email: form.email });
-      setPage("home");
+
+    try {
+      if (isLogin) {
+        const { data, error: signInError } = await supabase.auth.signInWithPassword({
+          email: form.email,
+          password: form.password,
+        });
+
+        if (signInError) throw signInError;
+        setUser(toAppUser(data.user));
+        setPage("home");
+      } else {
+        const { data, error: signUpError } = await supabase.auth.signUp({
+          email: form.email,
+          password: form.password,
+          options: {
+            data: {
+              name: form.name,
+            },
+          },
+        });
+
+        if (signUpError) throw signUpError;
+
+        if (data.session?.user) {
+          setUser(toAppUser(data.session.user));
+          setPage("home");
+        } else {
+          setMessage("Sign up successful. Check your email to confirm your account, then sign in.");
+        }
+      }
+    } catch (submitError) {
+      setError(submitError.message || "Authentication failed. Please try again.");
+    } finally {
       setLoading(false);
-    }, 1200);
+    }
   };
 
   return (
@@ -100,6 +139,12 @@ export default function Auth({ mode, setPage, setUser }) {
           {error && (
             <p className="text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-2">
               {error}
+            </p>
+          )}
+
+          {message && (
+            <p className="text-emerald-300 text-sm bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-4 py-2">
+              {message}
             </p>
           )}
 

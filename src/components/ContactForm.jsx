@@ -1,18 +1,50 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Send, Phone, Mail, CheckCircle } from "lucide-react";
+import emailjs from "@emailjs/browser";
 
 export default function ContactForm({ agent, property }) {
-  const [form, setForm] = useState({ name: "", email: "", phone: "", message: `Hi ${agent.name}, I'm interested in "${property.title}". Please get in touch with me.` });
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    message: `Hi ${agent.name}, I'm interested in "${property.title}". Please get in touch with me.`,
+  });
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSubmit = () => {
-    if (!form.name || !form.email) return;
+  useEffect(() => {
+    emailjs.init(import.meta.env.VITE_EMAILJS_PUBLIC_KEY);
+  }, []);
+
+  const handleSubmit = async () => {
+    if (!form.name || !form.email) {
+      setError("Please fill in your name and email.");
+      return;
+    }
+    setError("");
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+
+    try {
+      await emailjs.send(
+        import.meta.env.VITE_EMAILJS_SERVICE_ID,
+        import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+        {
+          from_name: form.name,
+          from_email: form.email,
+          phone: form.phone || "Not provided",
+          property_title: property.title,
+          message: form.message,
+          agent_name: agent.name,
+        }
+      );
       setSent(true);
-    }, 1500);
+    } catch (err) {
+      setError("Failed to send message. Please try again.");
+      console.error("EmailJS error:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (sent) {
@@ -44,7 +76,7 @@ export default function ContactForm({ agent, property }) {
         </div>
         <div>
           <p className="text-white font-semibold">{agent.name}</p>
-          <p className="text-white/40 text-xs">U.S. property specialist</p>
+          <p className="text-white/40 text-xs">Property Agent</p>
         </div>
       </div>
 
@@ -96,6 +128,13 @@ export default function ContactForm({ agent, property }) {
           onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))}
           className="input-field text-sm resize-none"
         />
+
+        {error && (
+          <p className="text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-2">
+            {error}
+          </p>
+        )}
+
         <button
           onClick={handleSubmit}
           disabled={loading || !form.name || !form.email}

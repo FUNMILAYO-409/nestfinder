@@ -9,6 +9,7 @@ export default function Navbar({ page, setPage, user, setUser, savedCount }) {
     { label: "Buy", value: "buy" },
     { label: "Rent", value: "rent" },
     { label: "Markets", value: "listings" },
+    { label: "Dashboard", value: "dashboard" },
     { label: "Saved", value: "saved" },
   ];
 

@@ -1,8 +1,12 @@
 import { MapPin, X } from "lucide-react";
 import { useState } from "react";
 
-export default function MapView({ properties, onSelect }) {
+export default function MapView({ properties, onSelect, onAreaFilterChange }) {
   const [tooltip, setTooltip] = useState(null);
+  const [drawing, setDrawing] = useState(false);
+  const [startPoint, setStartPoint] = useState(null);
+  const [currentPoint, setCurrentPoint] = useState(null);
+  const [selectionBox, setSelectionBox] = useState(null);
 
   // Simple visual map using SVG-like positioning within a styled container
   // In production you'd use Mapbox or Google Maps API
@@ -17,6 +21,16 @@ export default function MapView({ properties, onSelect }) {
     const x = ((lng - mapBounds.minLng) / (mapBounds.maxLng - mapBounds.minLng)) * 100;
     const y = ((mapBounds.maxLat - lat) / (mapBounds.maxLat - mapBounds.minLat)) * 100;
     return { x: Math.min(Math.max(x, 5), 95), y: Math.min(Math.max(y, 5), 95) };
+  };
+
+  const getPercentPoint = (event) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const x = ((event.clientX - rect.left) / rect.width) * 100;
+    const y = ((event.clientY - rect.top) / rect.height) * 100;
+    return {
+      x: Math.min(Math.max(x, 0), 100),
+      y: Math.min(Math.max(y, 0), 100),
+    };
   };
 
   const formatPrice = (p, listing) => {
@@ -38,13 +52,90 @@ export default function MapView({ properties, onSelect }) {
     }, {})
   );
 
+  const activeBox = selectionBox || (startPoint && currentPoint
+    ? {
+        left: Math.min(startPoint.x, currentPoint.x),
+        top: Math.min(startPoint.y, currentPoint.y),
+        width: Math.abs(startPoint.x - currentPoint.x),
+        height: Math.abs(startPoint.y - currentPoint.y),
+      }
+    : null);
+
+  const applyAreaFilter = (box) => {
+    if (!box || box.width < 1 || box.height < 1) {
+      onAreaFilterChange?.(null);
+      return;
+    }
+
+    const ids = properties
+      .filter((property) => {
+        const point = toPercent(property.lat, property.lng);
+        return (
+          point.x >= box.left &&
+          point.x <= box.left + box.width &&
+          point.y >= box.top &&
+          point.y <= box.top + box.height
+        );
+      })
+      .map((property) => property.id);
+
+    onAreaFilterChange?.(ids);
+  };
+
   return (
-    <div className="relative rounded-2xl overflow-hidden border border-white/10 map-placeholder" style={{ height: "520px" }}>
+    <div
+      className="relative rounded-2xl overflow-hidden border border-white/10 map-placeholder"
+      style={{ height: "520px" }}
+      onMouseDown={(event) => {
+        const point = getPercentPoint(event);
+        setDrawing(true);
+        setStartPoint(point);
+        setCurrentPoint(point);
+      }}
+      onMouseMove={(event) => {
+        if (!drawing) return;
+        setCurrentPoint(getPercentPoint(event));
+      }}
+      onMouseUp={(event) => {
+        if (!drawing || !startPoint) return;
+        const endPoint = getPercentPoint(event);
+        const box = {
+          left: Math.min(startPoint.x, endPoint.x),
+          top: Math.min(startPoint.y, endPoint.y),
+          width: Math.abs(startPoint.x - endPoint.x),
+          height: Math.abs(startPoint.y - endPoint.y),
+        };
+
+        setSelectionBox(box);
+        applyAreaFilter(box);
+        setDrawing(false);
+        setStartPoint(null);
+        setCurrentPoint(null);
+      }}
+      onMouseLeave={() => {
+        if (!drawing) return;
+        setDrawing(false);
+        setStartPoint(null);
+        setCurrentPoint(null);
+      }}
+    >
       {/* Map Label */}
       <div className="absolute top-4 left-4 z-10 bg-dark-900/90 backdrop-blur-sm rounded-xl px-4 py-2 border border-white/10">
         <p className="text-white/60 text-xs font-medium">📍 U.S. Property Map</p>
-        <p className="text-white/30 text-xs mt-0.5">Prices shown in USD. Click a pin to view the listing.</p>
+        <p className="text-white/30 text-xs mt-0.5">Click pins for details or drag to draw a search area.</p>
       </div>
+
+      {selectionBox && (
+        <button
+          onClick={() => {
+            setSelectionBox(null);
+            onAreaFilterChange?.(null);
+          }}
+          className="absolute top-4 right-4 z-20 bg-dark-900/90 border border-white/10 rounded-xl px-3 py-2 text-xs text-white/70 hover:text-white"
+        >
+          Clear area
+        </button>
+      )}
 
       {/* City Labels */}
       {cityLabels.map((city) => {
@@ -91,6 +182,18 @@ export default function MapView({ properties, onSelect }) {
           </div>
         );
       })}
+
+      {activeBox && (
+        <div
+          className="absolute z-10 border-2 border-brand-500/80 bg-brand-500/20"
+          style={{
+            left: `${activeBox.left}%`,
+            top: `${activeBox.top}%`,
+            width: `${activeBox.width}%`,
+            height: `${activeBox.height}%`,
+          }}
+        />
+      )}
 
       {/* Tooltip */}
       {tooltip && (
