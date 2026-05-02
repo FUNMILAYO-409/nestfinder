@@ -29,7 +29,7 @@ export default function Navbar({ page, setPage, user, setUser, savedCount }) {
               <span className="font-display text-xl font-semibold text-white block leading-none">
                 Nest<span className="text-brand-500">Finder</span>
               </span>
-              <span className="text-[10px] uppercase tracking-[0.25em] text-white/35 flex items-center gap-1 mt-1">
+              <span className="text-white/40 text-xs tracking-widest">
                 ✦ Find. Tour. Move In.
               </span>
             </div>
