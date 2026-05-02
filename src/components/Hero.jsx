@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, MapPin, ChevronDown, BadgeDollarSign } from "lucide-react";
+import { Search, MapPin, ChevronDown } from "lucide-react";
 import { cities, metroShortcuts, searchSuggestions } from "../data";
 
 export default function Hero({ onSearch, marketStats = [] }) {
@@ -29,11 +29,6 @@ export default function Hero({ onSearch, marketStats = [] }) {
 
       {/* Content */}
       <div className="relative z-10 text-center px-4 max-w-5xl mx-auto">
-        <div className="inline-flex items-center gap-2 bg-brand-500/10 border border-brand-500/20 rounded-full px-4 py-2 text-sm text-brand-500 font-medium mb-8 animate-fade-up">
-          <BadgeDollarSign size={14} />
-          United States housing market, priced in USD
-        </div>
-
         <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight animate-fade-up" style={{ animationDelay: '0.1s' }}>
           Search every major
           <span className="text-brand-500 block">U.S. home market</span>

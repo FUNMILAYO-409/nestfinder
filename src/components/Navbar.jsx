@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Home, Menu, X, Heart, User, LogOut, MapPinned } from "lucide-react";
+import { Home, Menu, X, Heart, User, LogOut } from "lucide-react";
 
 export default function Navbar({ page, setPage, user, setUser, savedCount }) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -30,7 +30,7 @@ export default function Navbar({ page, setPage, user, setUser, savedCount }) {
                 Nest<span className="text-brand-500">Finder</span>
               </span>
               <span className="text-[10px] uppercase tracking-[0.25em] text-white/35 flex items-center gap-1 mt-1">
-                <MapPinned size={10} /> ✦ Find. Tour. Move In.
+                ✦ Find. Tour. Move In.
               </span>
             </div>
           </button>
