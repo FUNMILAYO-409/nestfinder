@@ -1,4 +1,5 @@
-import { Search, CalendarCheck, KeyRound, ArrowRight } from "lucide-react";
+import { useState } from "react";
+import { Search, CalendarCheck, KeyRound, ArrowRight, Mail, Phone, User } from "lucide-react";
 
 const steps = [
   {
@@ -28,6 +29,17 @@ const steps = [
 ];
 
 export default function HowItWorks({ setPage }) {
+  const [showAgentForm, setShowAgentForm] = useState(false);
+  const [form, setForm] = useState({ name: "", email: "", phone: "", message: "" });
+
+  const handleAgentInquiry = () => {
+    const subject = encodeURIComponent("NestFinder Agent Inquiry");
+    const body = encodeURIComponent(
+      `Name: ${form.name}\nEmail: ${form.email}\nPhone: ${form.phone}\n\nMessage:\n${form.message}`
+    );
+    window.location.href = `mailto:tischendorf_lee@yahoo.com?subject=${subject}&body=${body}`;
+  };
+
   return (
     <section className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
       {/* Header */}
@@ -80,11 +92,79 @@ export default function HowItWorks({ setPage }) {
           <button onClick={() => setPage("listings")} className="btn-primary flex items-center gap-2">
             Start Your Search <ArrowRight size={16} />
           </button>
-          <button onClick={() => setPage("login")} className="btn-secondary">
+          <button onClick={() => setShowAgentForm((prev) => !prev)} className="btn-secondary">
             Talk to an Agent
           </button>
         </div>
       </div>
+
+      {showAgentForm && (
+        <div className="mt-12 grid grid-cols-1 lg:grid-cols-[1.2fr_0.8fr] gap-6">
+          <div className="bg-dark-800 border border-white/10 rounded-2xl p-6">
+            <div className="flex items-center gap-2 mb-5 text-white font-semibold">
+              <User size={18} className="text-brand-500" />
+              Send a message to an agent
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <input
+                type="text"
+                placeholder="Your name"
+                value={form.name}
+                onChange={(e) => setForm((current) => ({ ...current, name: e.target.value }))}
+                className="input-field"
+              />
+              <input
+                type="email"
+                placeholder="Your email"
+                value={form.email}
+                onChange={(e) => setForm((current) => ({ ...current, email: e.target.value }))}
+                className="input-field"
+              />
+              <input
+                type="tel"
+                placeholder="Phone number"
+                value={form.phone}
+                onChange={(e) => setForm((current) => ({ ...current, phone: e.target.value }))}
+                className="input-field sm:col-span-2"
+              />
+              <textarea
+                rows={4}
+                placeholder="How can the agent help you?"
+                value={form.message}
+                onChange={(e) => setForm((current) => ({ ...current, message: e.target.value }))}
+                className="input-field sm:col-span-2 resize-none"
+              />
+            </div>
+
+            <button onClick={handleAgentInquiry} className="btn-primary mt-4 w-full sm:w-auto flex items-center gap-2">
+              <Mail size={16} />
+              Email Agent
+            </button>
+          </div>
+
+          <div className="bg-gradient-to-br from-brand-500/10 to-transparent border border-brand-500/20 rounded-2xl p-6">
+            <p className="text-sm uppercase tracking-wider text-brand-500 font-semibold mb-3">Agent Contact</p>
+            <h3 className="font-display text-2xl font-bold text-white mb-2">Tischendorf Lee</h3>
+            <p className="text-white/50 text-sm leading-relaxed mb-6">
+              Licensed agent available to answer questions about listings, tours, and next steps.
+            </p>
+
+            <div className="space-y-4 text-sm text-white/70">
+              <div className="flex items-center gap-3">
+                <Mail size={16} className="text-brand-500" />
+                <a href="mailto:tischendorf_lee@yahoo.com" className="hover:text-white transition-colors">
+                  tischendorf_lee@yahoo.com
+                </a>
+              </div>
+              <div className="flex items-center gap-3">
+                <Phone size={16} className="text-brand-500" />
+                <span>Response within 24 hours</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
