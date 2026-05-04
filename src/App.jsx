@@ -111,7 +111,7 @@ export default function App() {
           <Hero onSearch={handleSearch} />
 
           {/* How It Works */}
-          <HowItWorks />
+          <HowItWorks setPage={setPage} />
 
           {/* Featured Properties */}
           <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">

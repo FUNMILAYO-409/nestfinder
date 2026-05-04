@@ -27,7 +27,7 @@ const steps = [
   },
 ];
 
-export default function HowItWorks() {
+export default function HowItWorks({ setPage }) {
   return (
     <section className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
       {/* Header */}
@@ -77,10 +77,10 @@ export default function HowItWorks() {
       <div className="text-center mt-12">
         <p className="text-white/40 text-sm mb-4">Join over 120,000 Americans who found their home with NestFinder</p>
         <div className="flex flex-wrap items-center justify-center gap-3">
-          <button className="btn-primary flex items-center gap-2">
+          <button onClick={() => setPage("listings")} className="btn-primary flex items-center gap-2">
             Start Your Search <ArrowRight size={16} />
           </button>
-          <button className="btn-secondary">
+          <button onClick={() => setPage("login")} className="btn-secondary">
             Talk to an Agent
           </button>
         </div>
